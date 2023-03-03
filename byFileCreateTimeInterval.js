@@ -72,7 +72,7 @@ function check() {
     var h = Math.floor(diff / 1000 / 60 / 60);
     var m = Math.floor(diff / 1000 / 60 % 60);
     var s = Math.floor(diff % 60000) / 1000;
-    console.log(h + ":" + m + ":" + s);
+    process.stdout.write(h + ":" + m + ":" + s);
     if (result === lastResult && lastTimestamp && timestamp - lastTimestamp > config.ALERT_THRESHOLD && !warningShown) {
         sendEmail();
         warningShown = true;
