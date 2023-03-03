@@ -1,5 +1,5 @@
 const config = {
-    DIRECTORY_TO_WATCH: 'C:\\Users\\kaikai\\Documents\\Heroes of the Storm', // 监控的目录
+    DIRECTORY_TO_WATCH: 'test', // 监控的目录
     ALERT_THRESHOLD: 60 * 60 * 1000, // 1小时
     INTERVAL_TIME: 60 * 1000, // 1分钟
     EMAIL_ACCOUNT: 'gslbexwy@qq.com', // 发件人邮箱
