@@ -1,12 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const config = require('./config');
 
-const DIRECTORY_TO_WATCH = './test'; // 监控的目录
-const ALERT_THRESHOLD = 60 * 60 * 1000; // 1小时
-const EMAIL_ACCOUNT = '111@qq.com'; // 发件人邮箱
-const EMAIL_PASSWORD = '111'; // 发件人邮箱密码
-const EMAIL_RECIPIENT = ['222@qq.com', '333@qq.com']; // 收件人邮箱
+console.log(config);
+
 
 let lastFileCreatedTime = null;
 
@@ -96,7 +94,7 @@ function startPolling() {
     saveHistory();
 
     if (shouldSendEmail) {
-        sendEmail();
+        //sendEmail();
     }
 
     setTimeout(startPolling, ALERT_THRESHOLD);
