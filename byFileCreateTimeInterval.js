@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const config = require('./config');
 
 console.log(config);
+console.log("\n");
 
 function sendEmail() {
     const transporter = nodemailer.createTransport({
@@ -72,7 +73,7 @@ function check() {
     var h = Math.floor(diff / 1000 / 60 / 60);
     var m = Math.floor(diff / 1000 / 60 % 60);
     var s = Math.floor(diff % 60000) / 1000;
-    process.stdout.write(h + ":" + m + ":" + s);
+    process.stdout.write("Status: " + h + ":" + m + ":" + s + "\r");
     if (result === lastResult && lastTimestamp && timestamp - lastTimestamp > config.ALERT_THRESHOLD && !warningShown) {
         sendEmail();
         warningShown = true;
