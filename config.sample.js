@@ -8,6 +8,7 @@ const config = {
     EMAIL_TITLE: 'title', // 邮件标题
     EMAIL_CONTENT: 'content', // 邮件内容
     INTERVAL_TIME: 5 * 1000, // 1分钟
+    MONITOR_TYPE: ".js" //  监控的文件类型
 }
 
 

@@ -67,12 +67,12 @@ let lastTimestamp;
 let warningShown = false;
 
 function check() {
-    const result = traverseDirectory(__dirname, '.js');
+    const result = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE);
     const timestamp = new Date().getTime();
     var diff = timestamp - result;
-    var h = Math.floor(diff / 1000 / 60 / 60);
-    var m = Math.floor(diff / 1000 / 60 % 60);
-    var s = Math.floor(diff % 60000) / 1000;
+    var h = ('0' + Math.floor(diff / 1000 / 60 / 60)).slice(-2);
+    var m = ('0' + Math.floor(diff / 1000 / 60 % 60)).slice(-2);
+    var s = ('0' + Math.floor(diff % 60000) / 1000).slice(-6);
     process.stdout.write("Status: " + h + ":" + m + ":" + s + "\r");
     if (result === lastResult && lastTimestamp && timestamp - lastTimestamp > config.ALERT_THRESHOLD && !warningShown) {
         sendEmail();
