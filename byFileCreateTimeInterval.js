@@ -61,30 +61,35 @@ function traverseDirectory(dirPath, fileType) {
     return latestDate;
 }
 
-
-let lastResult;
-let lastTimestamp;
+// 只在程序启动时执行一次，令其与 check 结果一致，避免第一次 check 时发送邮件
+let lastTraversedTime = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE);
+// 只在程序启动时执行一次，获得当前时间
+let lastChangeTime = new Date().getTime();
+// 初始状态下不发送邮件
 let warningShown = false;
 
 function check() {
-    const result = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE);
-    const timestamp = new Date().getTime();
-    var diff = timestamp - result;
+    const thisTraversedTime = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE);
+    const thisCheckingTime = new Date().getTime();
+
+    // 显示最新修改时间距离当前时间的差值
+    var diff = thisCheckingTime - thisTraversedTime;
     var h = ('0' + Math.floor(diff / 1000 / 60 / 60)).slice(-2);
     var m = ('0' + Math.floor(diff / 1000 / 60 % 60)).slice(-2);
     var s = ('0' + Math.floor(diff % 60000) / 1000).slice(-6);
     process.stdout.write("Status: " + h + ":" + m + ":" + s + "\r");
-    if (result === lastResult && lastTimestamp && timestamp - lastTimestamp > config.ALERT_THRESHOLD && !warningShown) {
-        sendEmail();
-        warningShown = true;
-    }
+    //console.log("Status: " + h + ":" + m + ":" + s + "\r");
 
-    if (result !== lastResult) {
+    if (thisTraversedTime !== lastTraversedTime) { // 最新修改时间有变化，说明文件更新了，重置三项状态
         warningShown = false;
+        lastChangeTime = thisTraversedTime;
+        lastTraversedTime = thisTraversedTime; // 更新最新修改时间
+    } else { // 无更新则检查时间和邮件发送状态
+        if (thisCheckingTime - lastChangeTime > config.ALERT_THRESHOLD && !warningShown) {
+            sendEmail();
+            warningShown = true;
+        }
     }
-
-    lastResult = result;
-    lastTimestamp = timestamp;
 
 }
 
