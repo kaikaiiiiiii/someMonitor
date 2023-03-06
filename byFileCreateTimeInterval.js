@@ -6,26 +6,26 @@ const config = require('./config');
 console.log(config);
 console.log("\n");
 
-function sendEmail() {
-    const transporter = nodemailer.createTransport({
-        host: "smtp.qq.com",
-        port: 587,
-        secure: false,
-        auth: {
-            user: config.EMAIL_ACCOUNT,
-            pass: config.EMAIL_PASSWORD,
-        },
-    });
 
-    const mailOptions = {
-        from: config.EMAIL_ACCOUNT,
-        to: config.EMAIL_RECIPIENT,
-        subject: config.EMAIL_TITLE,
-        text: config.EMAIL_CONTENT,
-    };
+const transporter = nodemailer.createTransport({
+    host: "smtp.qq.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: config.EMAIL_ACCOUNT,
+        pass: config.EMAIL_PASSWORD,
+    },
+});
 
+const mailOptions = {
+    from: config.EMAIL_ACCOUNT,
+    to: config.EMAIL_RECIPIENT,
+    subject: config.EMAIL_TITLE,
+    text: config.EMAIL_CONTENT,
+};
+
+async function sendEmail() {
     let mailtimestamp = new Date();
-
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
@@ -64,14 +64,14 @@ function traverseDirectory(dirPath, fileType) {
 }
 
 // 只在程序启动时执行一次，令其与 check 结果一致，避免第一次 check 时发送邮件
-let lastTraversedTime = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE);
+let lastTraversedTime = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE).getTime();
 // 只在程序启动时执行一次，获得当前时间
 let lastChangeTime = new Date().getTime();
 // 用于避免重复发送邮件，且第一次不发送邮件
 let warningMailFlag = false;
 
-function check() {
-    const thisTraversedTime = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE);
+async function check() {
+    const thisTraversedTime = traverseDirectory(config.DIRECTORY_TO_WATCH, config.MONITOR_TYPE).getTime();
     const thisCheckingTime = new Date().getTime();
 
     // 显示最新修改时间距离当前时间的差值
@@ -82,12 +82,19 @@ function check() {
     // process.stdout.write("Status: " + h + ":" + m + ":" + s + "\r");
     console.log("Status: " + h + ":" + m + ":" + s + "\r");
 
-    if (thisTraversedTime !== lastTraversedTime) { // 最新修改时间有变化，说明文件更新了，重置三项状态
+    if (thisTraversedTime !== lastTraversedTime) {// 最新修改时间有变化，说明文件更新了，重置三项状态
+        // 这里有个隐藏的 bug。traverseDirectory 返回的是时间对象，即使相同时间也是不同的对象，所以这里的判断永远为 true
+        // 需要将其转换为时间戳，即毫秒数以后再比较。
+        // 这里修改的方法是直接在 traverseDirectory().getTime() 中获取时间戳。
+
+        console.log('文件更新了，重置三项状态');
         warningMailFlag = true; //默认是 false，只有第一次文件更新后才开始启动邮件标记
         lastChangeTime = thisTraversedTime;
         lastTraversedTime = thisTraversedTime; // 更新最新修改时间
     } else { // 无更新则检查时间和邮件发送状态
+        console.log('无更新则检查时间和邮件发送状态');
         if (thisCheckingTime - lastChangeTime > config.ALERT_THRESHOLD && warningMailFlag) {
+            console.log('超过一小时没有新存档生成，大概率已经掉线。');
             sendEmail();
             warningMailFlag = false;
         }
@@ -95,6 +102,6 @@ function check() {
 
 }
 
-check();
 
+check();
 setInterval(check, config.INTERVAL_TIME);
